@@ -19,4 +19,4 @@ Usage
                                 Port to listen UDP messages (min 1, max 65535)
           -s, --servers SERVERS
                                 Servers list to balance the UDP messages
-                                Example: "localhost:8123, localhost:8124, example.com:8125"
+                                Example: "127.0.0.1:8123, 127.0.0.1:8124"
