@@ -72,7 +72,8 @@ int main(int argc, char **argv)
     unsigned int servers_amount = get_servers_amount(servers_list);
     printf("Listening on port: %d\n", udp_load_balancer_port);
     printf("Balancing to servers:\n");
-    for (unsigned int i = 0; i < servers_amount; ++i) {
+    unsigned int i;
+    for (i = 0; i < servers_amount; ++i) {
         printf("    %s\n", servers_list[i]);
     }
 

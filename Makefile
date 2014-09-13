@@ -11,7 +11,7 @@ install:
 	make clean
 
 clean:
-	find build -type f -not -name '.gitkeep' | xargs rm
+	find build -type f -not -name '.gitkeep' -exec rm {} +
 
 test:
 	make clean
