@@ -1,5 +1,7 @@
 UDP Load Balancer
 =================
+[![Build Status](https://travis-ci.org/stagecoachio/udp-load-balancer.svg?branch=master)](https://travis-ci.org/stagecoachio/udp-load-balancer)
+
 *UDP Load Balancer* is an open source (under the *MIT* license) load balancer which can load balance any UDP service.
 
 Installation
