@@ -50,7 +50,7 @@ void show_help() {
         "                            Port to listen UDP messages (min 1, max 65535)\n"
         "      -s, --servers SERVERS\n"
         "                            Servers list to balance the UDP messages\n"
-        "                            Example: \"localhost:8123, localhost:8124, example.com:8125\"\n"
+        "                            Example: \"127.0.0.1:8123, 127.0.0.1:8124\"\n"
     );
 }
 
