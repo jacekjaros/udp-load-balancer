@@ -7,6 +7,7 @@
 #include "udp_load_balancer.h"
 #include "argparse.h"
 #include "socket.h"
+#include "hostname_resolver.h"
 
 
 unsigned int get_servers_amount(char **servers_list) {
@@ -31,6 +32,13 @@ void run_dispatcher(char **servers_list, int socket_)
     int *servers_ports = get_servers_ports(servers_list, servers_amount);
 
     unsigned int i;
+
+    for (i = 0; i < servers_amount; i++) {
+        if (is_ip(servers_hosts[i]) == 0) {
+            servers_hosts[i] = get_ip_from_hostname(servers_hosts[i]);
+        }
+    }
+
     while(1) {
         for(i = 0; i < servers_amount; i++) {
             listen_udp_packet(message, &message_length, socket_);
@@ -50,7 +58,7 @@ void show_help() {
         "                            Port to listen UDP messages (min 1, max 65535)\n"
         "      -s, --servers SERVERS\n"
         "                            Servers list to balance the UDP messages\n"
-        "                            Example: \"127.0.0.1:8123, 127.0.0.1:8124\"\n"
+        "                            Example: \"127.0.0.1:8123, localhost:8124, example.com:8123\"\n"
     );
 }
 
@@ -71,10 +79,17 @@ int main(int argc, char **argv)
 
     unsigned int servers_amount = get_servers_amount(servers_list);
     printf("Listening on port: %d\n", udp_load_balancer_port);
+
     printf("Balancing to servers:\n");
+    char **servers_hosts = get_servers_hosts(servers_list, servers_amount);
+    int *servers_ports = get_servers_ports(servers_list, servers_amount);
     unsigned int i;
     for (i = 0; i < servers_amount; ++i) {
-        printf("    %s\n", servers_list[i]);
+        printf("    %s", servers_list[i]);
+        if(is_ip(servers_hosts[i]) == 0) {
+            printf(" (%s:%d)", get_ip_from_hostname(servers_hosts[i]), servers_ports[i]);
+        }
+        printf("\n");
     }
 
     int socket_ = create_socket(udp_load_balancer_port);
