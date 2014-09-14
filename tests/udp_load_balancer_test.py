@@ -6,15 +6,16 @@ from time import sleep
 import subprocess
 import os
 import signal
+from socket import gethostbyname
 
 
 class UdpLoadBalancerTestCase(unittest.TestCase):
     LOAD_BALANCER_PORT = 8137
     SERVERS_LIST = [
-        ('127.0.0.1', 9239),
+        ('localhost', 9239),
         ('127.0.0.1', 9240),
         ('127.0.0.1', 9241),
-        ('127.0.0.1', 9242),
+        ('localhost', 9242),
         ('127.0.0.1', 9243),
         ('127.0.0.1', 9244)
     ]
@@ -43,7 +44,7 @@ class UdpLoadBalancerTestCase(unittest.TestCase):
             value = self._redis.lpop('udp_packets')
             if value is not None:
                 value = value.decode("utf-8")
-            self.assertEqual('%s:%s:%s' % (expected_server[0], expected_server[1], i), value)
+            self.assertEqual('127.0.0.1:%s:%s' % (expected_server[1], i), value)
 
     def _get_servers_list(self):
         while True:
@@ -52,12 +53,12 @@ class UdpLoadBalancerTestCase(unittest.TestCase):
 
     def _start_servers(self):
         for server in self.SERVERS_LIST:
-            Thread(target=self._start_udp_server, args=server).start()
+            Thread(target=self._start_udp_server, args=(server[1],)).start()
         sleep(1)
 
     def _compile_load_balancer(self):
         process = subprocess.Popen(
-            ["gcc", "src/argparse.c", "src/socket.c", "src/udp_load_balancer.c", "-o", "build/udp_load_balancer_test"],
+            ["gcc", "src/argparse.c", "src/socket.c", "src/udp_load_balancer.c", "src/hostname_resolver.c", "-o", "build/udp_load_balancer_test"],
             stdout=subprocess.PIPE
         )
         process.wait()
@@ -90,13 +91,12 @@ class UdpLoadBalancerTestCase(unittest.TestCase):
             pass
 
     @staticmethod
-    def _start_udp_server(ip, port):
+    def _start_udp_server(port):
         """
-        @param ip: str
         @param port: int
         """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((ip, port))
+        sock.bind(('127.0.0.1', port))
 
         redis = Redis()
         while True:
@@ -106,7 +106,7 @@ class UdpLoadBalancerTestCase(unittest.TestCase):
             if data == 'die':
                 return
 
-            value = '%s:%s:%s' % (ip, port, data)
+            value = '127.0.0.1:%s:%s' % (port, data)
             redis.rpush('udp_packets', value)
 
 
